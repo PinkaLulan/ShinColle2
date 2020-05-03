@@ -1,0 +1,11 @@
+ext {
+    modVersion = '1.0'
+    modGroup = 'com.lulan.shincolle'
+    modBasename = 'shincolle2'
+    modDisplayName = 'ShinColle2 1.12.2'
+    modMinecraftVersion = '1.12.2'
+    modForgeVersion = '14.23.5.2847'
+    modMcpMapping = 'snapshot_20171003' // 'stable_39'
+    modCompileLibPath = 'D:/MCmod/1.12.2/libs/'
+    modRuntimeLibPath = 'D:/MCmod/1.12.2/libs/'
+}

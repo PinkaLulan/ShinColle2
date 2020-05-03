@@ -1,0 +1,17 @@
+[
+{
+  "modid": "shincolle2",
+  "name": "ShinColle 2",
+  "version": "@modVersion@",
+  "mcversion": "1.12.2",
+  "description": "Collect cute ship girls!  github: https://github.com/PinkaLulan/ShinColle2  Sound Source: Amitaro's Sound Material Workshop http://www14.big.or.jp/~amiami/happy/index.html",
+  "logoFile": "",
+  "url": "https://www.youtube.com/user/lulan222/",
+  "updateUrl": "",
+  "authorList": ["PinkaLulan"],
+  "credits": "Thanks to Pahimar, diesieben07, Jabelar, coolAlias, Neale and all the tutorials on the web _(:3",
+  "parent": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
