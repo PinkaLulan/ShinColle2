@@ -25,3 +25,8 @@ hs_err_pid*
 /.gradle/
 /build/
 run
+*.launch
+/.classpath
+/.project
+/gradlew
+/gradlew.bat
