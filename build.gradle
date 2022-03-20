@@ -1,128 +1,183 @@
-buildscript
-{
-    repositories
-    {
-        jcenter()
-        maven { url = "http://files.minecraftforge.net/maven" }
+buildscript {
+    repositories {
+        // These repositories are only for Gradle plugins, put any other repositories in the repository block further below
+        maven { url = 'https://maven.minecraftforge.net' }
+        mavenCentral()
     }
-    dependencies
-    {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+    dependencies {
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
     }
 }
-
-apply plugin: 'net.minecraftforge.gradle.forge'
+apply plugin: 'net.minecraftforge.gradle'
+// Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 apply plugin: 'eclipse'
 apply plugin: 'java'
+apply plugin: 'maven-publish'
 apply from: 'profile-base.gradle'
 import org.apache.tools.ant.filters.ReplaceTokens
 
-// Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
-
-// project info
 version = modMinecraftVersion + modVersion
-group = modGroup // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+group = modGroup
 archivesBaseName = modBasename
 compileJava.options.encoding = 'UTF-8'    // for zh_TW
 
-sourceCompatibility = targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
+// Mojang ships Java 17 to end users in 1.18+, so your mod should target Java 17.
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
-compileJava
-{
-    sourceCompatibility = targetCompatibility = '1.8'
-}
+println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
+minecraft {
+    // The mappings can be changed at any time and must be in the following format.
+    // Channel:   Version:
+    // snapshot   YYYYMMDD   Snapshot are built nightly.
+    // stable     #          Stables are built at the discretion of the MCP team.
+    // official   MCVersion  Official field/method names from Mojang mapping files
+    //
+    // You must be aware of the Mojang license when using the 'official' mappings.
+    // See more information here: https://github.com/MinecraftForge/MCPConfig/blob/master/Mojang.md
+    //
+    // Use non-default mappings at your own risk. They may not always work.
+    // Simply re-run your setup task after changing the mappings to update your workspace.
+    mappings channel: 'official', version: '1.18.1'
 
-eclipse
-{
-    println 'mod顯示名稱 [' + modDisplayName + ']'
+    // accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg') // Currently, this location cannot be changed from the default.
 
-    project
-    {
-        name = modDisplayName
+    // Default run configurations.
+    // These can be tweaked, removed, or duplicated as needed.
+    runs {
+        client {
+            workingDirectory project.file('run')
+
+            // Recommended logging data for a userdev environment
+            // The markers can be added/remove as needed separated by commas.
+            // "SCAN": For mods scan.
+            // "REGISTRIES": For firing of registry events.
+            // "REGISTRYDUMP": For getting the contents of all registries.
+            property 'forge.logging.markers', 'REGISTRIES'
+
+            // Recommended logging level for the console
+            // You can set various levels here.
+            // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
+            property 'forge.logging.console.level', 'debug'
+
+            mods {
+                shincolle2 {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        server {
+            workingDirectory project.file('run')
+
+            // Recommended logging data for a userdev environment
+            // The markers can be added/remove as needed separated by commas.
+            // "SCAN": For mods scan.
+            // "REGISTRIES": For firing of registry events.
+            // "REGISTRYDUMP": For getting the contents of all registries.
+            property 'forge.logging.markers', 'REGISTRIES'
+
+            // Recommended logging level for the console
+            // You can set various levels here.
+            // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
+            property 'forge.logging.console.level', 'debug'
+
+            mods {
+                shincolle2 {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        data {
+            workingDirectory project.file('run')
+
+            // Recommended logging data for a userdev environment
+            // The markers can be added/remove as needed separated by commas.
+            // "SCAN": For mods scan.
+            // "REGISTRIES": For firing of registry events.
+            // "REGISTRYDUMP": For getting the contents of all registries.
+            property 'forge.logging.markers', 'REGISTRIES'
+
+            // Recommended logging level for the console
+            // You can set various levels here.
+            // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
+            property 'forge.logging.console.level', 'debug'
+
+            // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
+            args '--mod', 'shincolle2', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+
+            mods {
+                shincolle2 {
+                    source sourceSets.main
+                }
+            }
+        }
     }
 }
 
-minecraft
-{
-    println '版本 [' + modMinecraftVersion + '] [' + modForgeVersion + '] [' +
-            modMcpMapping + ']'
-    
-    version = modMinecraftVersion + '-' + modForgeVersion
-    runDir = 'run'
-    
-    // the mappings can be changed at any time, and must be in the following format.
-    // snapshot_YYYYMMDD   snapshot are built nightly.
-    // stable_#            stables are built at the discretion of the MCP team.
-    // Use non-default mappings at your own risk. they may not always work.
-    // simply re-run your setup task after changing the mappings to update your workspace.
-    mappings = modMcpMapping
-    
-    // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
+// Include resources generated by data generators.
+sourceSets.main.resources { srcDir 'src/generated/resources' }
 
-    //replace "@version@", project.version // replace @version@ to project.version
-}
+repositories {
+    // Put repositories for dependencies here
+    // ForgeGradle automatically adds the Forge maven and Maven Central for you
 
-repositories
-{
-    maven
-    {
-        name "BuildCraft"
-        url = "https://mod-buildcraft.com/maven"
-    }
-    
-    maven
-    {
-		name = "ic2"
-		url = "http://maven.ic2.player.to/"
-	}
+    // If you have mod jar dependencies in ./libs, you can declare them as a repository like so:
+    // flatDir {
+    //     dir 'libs'
+    // }
 	
-	maven
-    {
-		name = "codechicken"
-		url = "http://chickenbones.net/maven/"
-	}
+	flatDir { dir 'mods' }
+	maven { url 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/' }
+	maven { url 'https://dvs1.progwml6.com/files/maven/' }
+	maven { url 'https://oss.sonatype.org/content/groups/public/' }
+	
 }
 
-dependencies
-{
-    // you may put jars on which you depend on in ./libs
-    // or you may define them like so..
-    //compile "some.group:artifact:version:classifier"
-    //compile "some.group:artifact:version"
-      
-    // real examples
-    //compile 'com.mod-buildcraft:buildcraft:6.0.8:dev'  // adds buildcraft to the dev env
-    //compile 'com.googlecode.efficient-java-matrix-library:ejml:0.24' // adds ejml to the dev env
+dependencies {
+    // Specify the version of Minecraft to use. If this is any group other than 'net.minecraft', it is assumed
+    // that the dep is a ForgeGradle 'patcher' dependency, and its patches will be applied.
+    // The userdev artifact is a special name and will get all sorts of transformations applied to it.
+    minecraft 'net.minecraftforge:forge:' + modMinecraftVersion + '-' + modForgeVersion
 
-    // the 'provided' configuration is for optional dependencies that exist at compile-time but might not at runtime.
-    //provided 'com.mod-buildcraft:buildcraft:6.0.8:dev'
+    // Real mod deobf dependency examples - these get remapped to your current mappings
+    // compileOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}:api") // Adds JEI API as a compile dependency
+    // runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}") // Adds the full JEI mod as a runtime dependency
+    // implementation fg.deobf("com.tterrag.registrate:Registrate:MC${mc_version}-${registrate_version}") // Adds registrate as a dependency
 
-    // the deobf configurations:  'deobfCompile' and 'deobfProvided' are the same as the normal compile and provided,
-    // except that these dependencies get remapped to your current MCP mappings
-    //deobfProvided 'com.mod-buildcraft:buildcraft:6.0.8:dev'
-    compile 'com.mod-buildcraft:buildcraft-all:7.99.24.6'
-    compile 'net.industrial-craft:industrialcraft-2:2.8.197-ex112'
-//    compile 'codechicken:CodeChickenLib:1.12.2-3.2.2.353:deobf'
-    
-    // for more info...
-    // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
-    // http://www.gradle.org/docs/current/userguide/dependency_management.html
-    compile files (
-        modCompileLibPath + 'forestry_1.12.2-5.8.2.422.jar',
-        modCompileLibPath + 'metamorph-1.1.9-1.12.2.jar',
-        modCompileLibPath + 'Baubles-1.12-1.5.2.jar',
-        modCompileLibPath + 'iChunUtil-1.12.2-7.2.2.jar',
-        modCompileLibPath + 'inventorysorter-1.12.2-1.13.3+57.jar',
-        modCompileLibPath + 'jei_1.12.2-4.15.0.291.jar',
-        modCompileLibPath + 'journeymap-1.12.2-5.7.1.jar',
-        modCompileLibPath + 'CodeChickenLib-1.12.2-3.2.3.358-universal.jar',
-        modCompileLibPath + 'mclib-1.0.4-1.12.2.jar',
-        modCompileLibPath + 'NBTEdit-0.7.jar',
-        modCompileLibPath + 'NotEnoughItems-1.12.2-2.4.3.245-universal.jar',
-        modCompileLibPath + 'Tabula-1.12.2-7.1.0.jar',
-        modCompileLibPath + 'torohealth-1.12.2-11.jar',
-    )
+    // Examples using mod jars from ./libs
+    // implementation fg.deobf("blank:coolmod-${mc_version}:${coolmod_version}")
+    //implementation fg.deobf("flatDir:journeymap-1.18.1:5.8.0beta9")
+	
+	implementation fg.deobf("software.bernie.geckolib:geckolib-1.18-forge:3.0.11")
+	implementation fg.deobf("info.journeymap:journeymap-1.18.1:5.8.0beta9")
+	
+	// compile用api
+	compileOnly fg.deobf("mezz.jei:jei-1.18.1:9.4.1.112:api")
+	// 執行用完整jar檔
+	runtimeOnly fg.deobf("mezz.jei:jei-1.18.1:9.4.1.112")
 }
+
+// Example for how to get properties into the manifest for reading at runtime.
+jar {
+    manifest {
+        attributes([
+                "Specification-Title"     : modBasename,
+                "Specification-Vendor"    : "lulanee",
+                "Specification-Version"   : modVersion,
+                "Implementation-Title"    : project.name,
+                "Implementation-Version"  : modVersion,
+                "Implementation-Vendor"   : "lulanee",
+                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
+    }
+}
+
+// Example configuration to allow publishing using the maven-publish plugin
+// This is the preferred method to reobfuscate your jar file
+jar.finalizedBy('reobfJar')
+// However if you are in a multi-project build, dev time needs unobfed jar files, so you can delay the obfuscation until publishing by doing
+// publish.dependsOn('reobfJar')
 
 processResources
 {
@@ -157,4 +212,17 @@ processResources
 //        exclude 'mcmod.info'
 //    }
     
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact jar
+        }
+    }
+    repositories {
+        maven {
+            url "file://${project.projectDir}/mcmodsrepo"
+        }
+    }
 }
